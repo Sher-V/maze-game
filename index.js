@@ -25,10 +25,11 @@ class Maze {
     }
 
     hasNeighbours(current, seen) {
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 4; i++) {
             const point = {x: current.x + dr[i], y: current.y + dc[i]};
-            if (this.isValid(point.x, point.y) && !seen[point.x][point.y])
+            if (this.isValid(point.x, point.y) && !seen[point.x][point.y]) {
                 return true;
+            }
         }
         return false;
     }
@@ -38,29 +39,30 @@ class Maze {
         this.grid = seen.map((row, i) => row.map((cell, j) => new Point(i, j)));
         const stack = [];
         const startCell = this.grid[this.randNum(this._height)][this.randNum(this._width)];
-        stack.push(startCell);
+
         seen[startCell.x][startCell.y] = true;
 
-        let i = 0;
+        stack.push(startCell);
+
         while (stack.length) {
             const current = stack.pop();
-            console.log(i)
-            i++;
             if (this.hasNeighbours(current, seen)) {
                 stack.push(current);
-                let randNum = this.randNum(4);
-                let x = current.x + dr[randNum];
-                let y = current.y + dc[randNum];
-                while (!this.isValid(x, y) || seen[x][y]) {
+
+                let x, y, randNum;
+                do {
                     randNum = this.randNum(4);
                     x = current.x + dr[randNum];
                     y = current.y + dc[randNum];
                 }
+                while (!this.isValid(x, y) || seen[x][y])
+
                 current.walls[randNum] = false;
                 if (randNum - 2 >= 0)
                     this.grid[x][y].walls[randNum - 2] = false;
                 else
                     this.grid[x][y].walls[randNum + 2] = false;
+
                 seen[x][y] = true;
                 stack.push(this.grid[x][y]);
             }
