@@ -98,11 +98,97 @@ class Maze {
             })
         })
     }
+
+    addPlayer(player) {
+        document.getElementsByClassName("row")[player._x]
+            .childNodes[player._y].classList.add("active");
+
+        window.addEventListener("keydown", (e) => {
+            if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+                e.preventDefault();
+                this.movePlayer(player, e.key);
+            }
+        }, false);
+    }
+
+    checkWin(player) {
+        if (player._x === this._height - 1 && player._y === this._width - 1) {
+            document.getElementsByClassName("row")[player._x]
+                .childNodes[player._y].classList.remove("active");
+            document.getElementsByClassName("row")[0]
+                .childNodes[0].classList.add("active")
+            player._x = 0;
+            player._y = 0;
+        }
+    }
+
+    movePlayer(player, key) {
+        switch (key) {
+            case "ArrowUp":
+                if (this.isValid(player._x - 1, player._y) && !this.grid[player._x][player._y].walls[0]) {
+                    document.getElementsByClassName("row")[player._x]
+                        .childNodes[player._y].classList.remove("active");
+                    document.getElementsByClassName("row")[player._x - 1]
+                        .childNodes[player._y].classList.add("active")
+                    player._x -= 1;
+                    this.checkWin(player);
+                }
+                break;
+            case "ArrowRight":
+                if (this.isValid(player._x, player._y + 1) && !this.grid[player._x][player._y].walls[1]) {
+                    document.getElementsByClassName("row")[player._x]
+                        .childNodes[player._y].classList.remove("active");
+                    document.getElementsByClassName("row")[player._x]
+                        .childNodes[player._y + 1].classList.add("active")
+                    player._y += 1;
+                    this.checkWin(player);
+                }
+
+                break;
+            case "ArrowDown":
+                if (this.isValid(player._x + 1, player._y) && !this.grid[player._x][player._y].walls[2]) {
+                    document.getElementsByClassName("row")[player._x]
+                        .childNodes[player._y].classList.remove("active");
+                    document.getElementsByClassName("row")[player._x + 1]
+                        .childNodes[player._y].classList.add("active")
+                    player._x += 1;
+                    this.checkWin(player);
+                }
+                break;
+            case "ArrowLeft":
+                if (this.isValid(player._x, player._y - 1) && !this.grid[player._x][player._y].walls[3]) {
+                    document.getElementsByClassName("row")[player._x]
+                        .childNodes[player._y].classList.remove("active");
+                    document.getElementsByClassName("row")[player._x]
+                        .childNodes[player._y - 1].classList.add("active")
+                    player._y -= 1;
+                    this.checkWin(player);
+                }
+                break;
+        }
+    }
 }
 
-const maze = new Maze(5, 5);
+class Player {
+    constructor(x, y) {
+        this._x = x;
+        this._y = y;
+    }
+
+
+    set x(value) {
+        this._x = value;
+    }
+
+    set y(value) {
+        this._y = value;
+    }
+}
+
+const maze = new Maze(18, 18);
 
 maze.generateMaze();
-
 maze.renderMaze();
+
+maze.addPlayer(new Player(0, 0))
 
