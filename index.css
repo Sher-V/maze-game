@@ -48,3 +48,7 @@
 .bottomBorder {
     border-bottom: 1px solid black;
 }
+
+.colored {
+    background-color: green;
+}
