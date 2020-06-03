@@ -118,9 +118,16 @@ class Maze {
                 .childNodes[player._y].classList.remove("active");
             document.getElementsByClassName("row")[0]
                 .childNodes[0].classList.add("active")
-            /*            player._x = 0;
-                        player._y = 0;*/
         }
+    }
+
+    reset() {
+        console.log(this.player)
+        this.player._x = 0;
+        this.player._y = 0;
+        document.getElementsByClassName("active")[0].classList.remove("active");
+        document.getElementsByClassName("row")[0].childNodes[0].classList.add("active");
+        this.isSolving = false;
     }
 
     sleep(ms) {
@@ -128,11 +135,13 @@ class Maze {
     }
 
     async solve() {
+        if (this.isSolving) return;
+        this.isSolving = true;
         const queueX = [], queueY = [],
+            prev = Array.from(new Array(this._height), () => new Array(this._width).fill(null)),
             marked = Array.from(new Array(this._height), () => new Array(this._width).fill(null));
         queueX.push(this.player._x);
         queueY.push(this.player._y);
-        debugger
 
         while (queueY.length) {
             const x = queueX.shift(), y = queueY.shift();
@@ -140,15 +149,29 @@ class Maze {
                 const newX = x + dr[i], newY = y + dc[i];
                 if (this.isValid(newX, newY) && !marked[newX][newY] && !this.grid[x][y].walls[i]) {
                     marked[newX][newY] = true;
-                    await this.sleep(10);
-                    const elements = document.getElementsByClassName("active");
-                    document.getElementsByClassName("row")[newX].childNodes[newY].classList.add("active");
+                    prev[newX][newY] = {x, y};
+                    // await this.sleep(10);
+                    /*                    const elements = document.getElementsByClassName("active");
+                                        document.getElementsByClassName("row")[newX].childNodes[newY].classList.add("active");*/
                     if (newX === this._height - 1 && newY === this._width - 1) break;
                     queueX.push(newX);
                     queueY.push(newY);
                 }
             }
         }
+
+        let path = [];
+        for (let at = prev[this._height - 1][this._width - 1]; at.x !== 0 || at.y !== 0; at = prev[at.x][at.y]) {
+            path.push(at);
+        }
+        path = path.reverse();
+        for (const el of path) {
+            await this.sleep(150);
+            document.getElementsByClassName("active")[0].classList.remove("active");
+            document.getElementsByClassName("row")[el.x]
+                .childNodes[el.y].classList.add("active");
+        }
+
     }
 
     movePlayer(player, key) {
@@ -214,11 +237,19 @@ class Player {
     }
 }
 
-const maze = new Maze(18, 18);
+const maze = new Maze(15, 15);
+
 
 maze.generateMaze();
 maze.renderMaze();
 
 maze.addPlayer(new Player(0, 0))
 
-maze.solve()
+document.getElementById("solve").addEventListener("click", () => {
+    maze.solve();
+})
+
+document.getElementById("reset").addEventListener("click", () => {
+    maze.reset();
+})
+
